@@ -1,0 +1,47 @@
+
+@keyframes startup {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.container {
+    display: flex;
+    padding: 0 20px;
+    overflow-y: hidden;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    text-align: center;
+    background-image: linear-gradient(
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    height: calc(100vh - 50px);
+    animation: startup 0.2s ease-out 0.1s forwards;
+
+    &::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+}
+
+.clipboard-item {
+    width: 200px;
+    height: 200px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transform: translate(0);
+    flex-shrink: 0;
+    margin: 0 10px;
+}

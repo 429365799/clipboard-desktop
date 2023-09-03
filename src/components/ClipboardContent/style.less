@@ -1,0 +1,98 @@
+.clipboard-content {
+    overflow: auto;
+    height: 100%;
+    border-top: 2px solid;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: #b7b7b7;
+        border-radius: 10px;
+
+        &:hover {
+            cursor: pointer;
+            background-color: #4b4b4b;
+        }
+    }
+    &::-webkit-scrollbar-track-piece {
+        background-color: transparent;
+        border-radius: 10px;
+    }
+
+    .content {
+        font-size: 12px;
+        width: fit-content;
+        height: 100%;
+        padding: 8px;
+    }
+    .content-text {
+    }
+    .content-html {
+        .format-btn {
+            position: fixed;
+            right: 4px;
+            bottom: 4px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            padding: 2px 4px;
+            cursor: pointer;
+
+            &::before {
+                content: "F";
+                display: inline-flex;
+                font-family: sans-serif;
+                width: 16px;
+                height: 16px;
+                justify-content: center;
+                align-items: center;
+                font-size: 10px;
+                border-radius: 50%;
+                color: rgba(244, 67, 54, 1);
+                border: 1px solid rgba(244, 67, 54, 1);
+            }
+
+            &.active::before {
+                color: #ffffff;
+                background-color: rgba(244, 67, 54, 1);
+            }
+        }
+    }
+    .content-files {
+        padding: 4px 0;
+
+        .file-item {
+            display: flex;
+            padding: 4px;
+
+            &:hover {
+                background-color: #a4a4a441;
+                cursor: pointer;
+            }
+
+            img {
+                width: 30px;
+                height: 30px;
+                margin-right: 6px;
+            }
+
+            .file-info {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                text-align: left;
+
+                .file-name {
+                    font-size: 12px;
+                    white-space: nowrap;
+                }
+
+                .file-size {
+                    font-size: 10px;
+                }
+            }
+        }
+    }
+}
