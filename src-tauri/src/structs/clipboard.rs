@@ -1,10 +1,11 @@
 use std::fs;
 
-use clipboardrs::api::{ClipboardFile, ClipboardData};
-use serde::{Serialize, ser::SerializeStruct};
+use clipboardrs::api::{ClipboardData, ClipboardFile};
+use serde::{ser::SerializeStruct, Serialize};
 use tauri::api::path::cache_dir;
 use uuid::Uuid;
 
+#[derive(Debug)]
 pub(crate) struct MyFile(ClipboardFile);
 
 impl Serialize for MyFile {
@@ -19,6 +20,7 @@ impl Serialize for MyFile {
     }
 }
 
+#[derive(Debug)]
 pub(crate) struct MyClipboardData {
     key: String,
     len: usize,

@@ -1,4 +1,4 @@
-import type { Application } from "./core/application"
+import type { Application } from './core/application'
 
 declare global {
     interface Window {
@@ -6,3 +6,4 @@ declare global {
     }
 }
 
+declare type ValueOf<T> = T[keyof T]

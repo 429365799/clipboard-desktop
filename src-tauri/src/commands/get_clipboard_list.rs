@@ -1,4 +1,3 @@
-
 use clipboardrs::api::read_clipboard_data;
 
 use crate::structs::clipboard::MyClipboardData;
