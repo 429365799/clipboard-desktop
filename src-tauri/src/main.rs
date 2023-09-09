@@ -1,11 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::structs::states::AppState;
+use crate::{structs::states::AppState, commands::window_visible};
 use tauri::{
     CustomMenuItem, Manager, Pixel, Position, Size, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    WindowEvent,
+    WindowEvent, State,
 };
+
+use clipboardrs::listener::ClipboardListen;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 
@@ -56,36 +58,52 @@ fn main() {
             //     _ => (),
             // });
 
+            let b_main_window = main_window.clone();
+
             SystemTray::new()
                 .with_menu(
                     SystemTrayMenu::new()
-                        .add_item(CustomMenuItem::new("quit", "Quit"))
-                        .add_item(CustomMenuItem::new("open", "Open")),
+                        .add_item(CustomMenuItem::new("open", "打开"))
+                        .add_item(CustomMenuItem::new("settings", "设置"))
+                        .add_item(CustomMenuItem::new("quit", "退出")),
                 )
-                .on_event(|event| match event {
-                    SystemTrayEvent::LeftClick {
-                        tray_id,
-                        position,
-                        size,
-                        ..
-                    } => {}
-                    // SystemTrayEvent::MenuItemClick { tray_id, id, .. } => todo!(),
-                    // SystemTrayEvent::RightClick {
-                    //     tray_id,
-                    //     position,
-                    //     size,
-                    //     ..
-                    // } => todo!(),
-                    // SystemTrayEvent::DoubleClick {
-                    //     tray_id,
-                    //     position,
-                    //     size,
-                    //     ..
-                    // } => todo!(),
-                    _ => todo!(),
+                .on_event(move |event| match event {
+                    SystemTrayEvent::LeftClick {..} => {
+                        let app_state: State<'_, AppState> = b_main_window.state();
+
+                        if let Ok(window_visible) = b_main_window.is_visible() {
+                            if window_visible {
+                                b_main_window.hide().unwrap();
+                            } else {
+                                b_main_window.show().unwrap();
+                                b_main_window.set_focus().unwrap();
+                            }
+
+                            app_state.set_main_window_visibility(!window_visible);
+                        }
+                    }
+                    SystemTrayEvent::MenuItemClick { id, .. } => {
+                        let app_state: State<'_, AppState> = b_main_window.state();
+
+                        match id.as_str() {
+                            "open" => {
+                                b_main_window.show().unwrap();
+                                b_main_window.set_focus().unwrap();
+                                app_state.set_main_window_visibility(true);
+                            }
+                            "settings" => {
+                            }
+                            "quit" => {
+                            }
+                            _ => (),
+                        }
+                    },
+                    _ => (),
                 })
                 .build(app)?;
 
+            main_window.hide().unwrap();
+            println!("Success setup application!");
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -95,10 +113,6 @@ fn main() {
             crate::commands::window_visible::show_main_window,
             crate::commands::window_visible::hide_main_window,
         ])
-        //     main_window.hide().unwrap();
-        //     println!("Success setup application!");
-        //     Ok(())
-        // })
         // // .on_window_event(|event: GlobalWindowEvent| match event.event() {
         // //     WindowEvent::Focused(is_focus) => {
         // //         let w = event.window();

@@ -15,4 +15,9 @@ impl AppState {
             clipboard_list: Mutex::new(vec![]),
         }
     }
+
+    pub fn set_main_window_visibility(&self, visible: bool) {
+        let mut visibility = self.main_window_visibility.lock().unwrap();
+        *visibility = visible;
+    }
 }
