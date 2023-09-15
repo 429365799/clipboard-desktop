@@ -17,7 +17,14 @@ impl AppState {
     }
 
     pub fn set_main_window_visibility(&self, visible: bool) {
-        let mut visibility = self.main_window_visibility.lock().unwrap();
-        *visibility = visible;
+        if let Ok(mut visibility) = self.main_window_visibility.lock() {
+            *visibility = visible;
+        }
+    }
+
+    pub fn put_clipboard_data(&self, data: MyClipboardData) {
+        if let Ok(mut clipboard_list) = self.clipboard_list.lock() {
+            (*clipboard_list).push(data);
+        }
     }
 }
