@@ -1,5 +1,6 @@
 
-export const TypeOrder = ['text', 'image', 'files', 'html']
+// 这里跟rust后端的MyClipboardData的format_types对应
+export const TypeOrder = ['html', 'text', 'image', 'files']
 
 export const Colors = {
     html: 'rgba(244, 67, 54, 1)',

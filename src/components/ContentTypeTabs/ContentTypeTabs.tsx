@@ -1,23 +1,23 @@
 import "./style.less";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ClipboardData } from "../../interfaces";
+import { ClipboardData, FormatType } from "../../interfaces";
 import { TabItem } from "./TabItem";
 import { TypeOrder } from "../../constants";
 
 interface IProps {
     data: ClipboardData
-    defaultActiveTab?: keyof ClipboardData
-    onActiveChange: (activeTab: keyof ClipboardData) => void
+    defaultActiveTab?: FormatType
+    onActiveChange: (key: string, activeTab: FormatType) => void
 }
 
 export const ContentTypeTabs = (props: IProps) => {
     const { data, defaultActiveTab, onActiveChange } = props
     const [activeTab, setActiveTab] = useState('')
     
-    const handleTabChange = useCallback((tab: string) => {
+    const handleTabChange = useCallback((tab: FormatType) => {
         setActiveTab(tab)
-        onActiveChange(tab as keyof ClipboardData)
+        onActiveChange(data.key, tab)
     }, [])
     
     useEffect(() => {
@@ -25,9 +25,7 @@ export const ContentTypeTabs = (props: IProps) => {
     }, [defaultActiveTab])
 
     const keys = useMemo(() => {
-        const keys = Object.keys(data) as (keyof ClipboardData)[]
-        keys.sort((a, b) => TypeOrder.indexOf(a) - TypeOrder.indexOf(b))
-        return keys
+        return data.format_types.sort((a, b) => TypeOrder.indexOf(a) - TypeOrder.indexOf(b))
     }, [data])
 
     return (

@@ -1,11 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::process;
-use std::sync::{mpsc, Arc};
-
 use crate::structs::clipboard::MyClipboardData;
-use crate::{commands::window_visible, structs::states::AppState};
+use crate::structs::states::AppState;
 use tauri::{
     App, CustomMenuItem, Manager, Pixel, Position, Size, State, SystemTray, SystemTrayEvent,
     SystemTrayMenu, WindowEvent,
@@ -28,19 +25,14 @@ mod structs {
 }
 
 fn init_app(app: &App) {
-    let app = Arc::new(app);
-
+    let app_handle = app.app_handle();
     ClipboardListen::run(move || {
         if let Ok(data) = read_clipboard_data() {
-            // let app_state = app.state::<AppState>();
-            println!("剪贴板更新！{:?}", app);
+            let app_state = app_handle.state::<AppState>();
+            app_state.put_clipboard_data(MyClipboardData::new(data));
+            app_handle.emit_all("CLIPBOARD_UPDATE", ()).unwrap();
         }
     });
-
-    // while let Ok(data) = rx.recv() {
-    //     let app_state = app.state::<AppState>();
-    //     app_state.put_clipboard_data(data);
-    // }
 }
 
 fn init_window_style(app: &App) {

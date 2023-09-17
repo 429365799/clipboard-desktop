@@ -1,6 +1,5 @@
 import { globalShortcut } from '@tauri-apps/api'
 import type { Application } from './application'
-import { Commands } from './command-manager'
 
 export class ShortcutManager {
     constructor(private app: Application) {
@@ -9,7 +8,7 @@ export class ShortcutManager {
 
     registerShortcuts() {
         globalShortcut.register('Ctrl+Shift+V', () => {
-            this.app.invokeCommand(Commands.ToggleMainWindow)
+            this.app.getCommandManager().toggleMainWindow()
         })
         // globalShortcut.register('Left', (e) => {
         //     console.log('left', e)

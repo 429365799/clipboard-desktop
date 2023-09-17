@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api'
 import { ClipboardData } from '../interfaces'
 import type { Application } from './application'
 import { ValueOf } from '../global'
+import { useClipboardList } from '../states/clipboard-list'
 
 export const Commands = {
     GetClipboardList: 'get_clipboard_list',
@@ -15,7 +16,17 @@ export type Command = ValueOf<typeof Commands>
 export class CommandManager {
     constructor(private app: Application) {}
 
-    async invoke(command: Command, args?: any) {
-        return await invoke<ClipboardData[]>(command, args)
+    async invoke<Response>(command: Command, args?: any) {
+        return await invoke<Response>(command, args)
+    }
+
+    async initClipboardList() {
+        const list = await this.invoke<ClipboardData[]>(Commands.GetClipboardList)
+        console.log('list', list)
+        useClipboardList.getState().reset(list)
+    }
+
+    async toggleMainWindow() {
+        return await this.invoke(Commands.ToggleMainWindow)
     }
 }

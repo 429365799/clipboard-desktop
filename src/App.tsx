@@ -1,74 +1,70 @@
 import './App.less'
 
-import { useState } from 'react'
-import { useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ContentTypeTabs } from './components/ContentTypeTabs/ContentTypeTabs'
-import { ClipboardData } from './interfaces'
+import { ClipboardData, FormatType } from './interfaces'
 import { ClipboardContent } from './components/ClipboardContent/ClipboardContent'
-import { TypeOrder } from './constants'
-import { Commands } from './core/command-manager'
+import { useClipboardList } from './states/clipboard-list'
+
+interface TabData {
+    active: FormatType
+    data: ClipboardData
+}
 
 function App() {
-    const [list, setList] = useState<ClipboardData[]>([])
-    const [activeTab, setActiveTab] = useState<keyof ClipboardData>()
+    const clipoardList = useClipboardList(state => state.list)
+    const [tabs, setTabs] = useState<Record<string, TabData> | null>(null)
+    const [indicatorIndex, setIndicatorIndex] = useState(0)
 
     useEffect(() => {
-        getList()
-    }, [])
+        const tabData: Record<string, TabData> = {}
+        if (clipoardList.length > 0) {
+            for (const item of clipoardList) {
+                tabData[item.key] = {
+                    active: item.format_types[0],
+                    data: item,
+                }
+            }
+            setTabs(tabData)
+        }
+    }, [clipoardList])
 
-    const getList = () => {
-        window.APP.invokeCommand(Commands.GetClipboardList).then((res) => {
-            setList([
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-                res[0],
-            ])
-
-            if (res.length > 0) {
-                const keys = Object.keys(res[0]) as (keyof ClipboardData)[]
-                setActiveTab(
-                    keys.sort(
-                        (a, b) => TypeOrder.indexOf(a) - TypeOrder.indexOf(b)
-                    )[0]
-                )
+    const changeActiveTab = useCallback((key: string, type: FormatType) => {
+        setTabs((tabs) => {
+            if (!tabs) {
+                return null
+            }
+            return {
+                ...tabs,
+                [key]: {
+                    ...tabs[key],
+                    active: type,
+                },
             }
         })
-    }
+    }, [])
 
     return (
         <div className='container'>
-            {list.map((item, index) => (
-                <div key={index} className='clipboard-item'>
-                    <ContentTypeTabs
-                        data={item}
-                        defaultActiveTab={activeTab}
-                        onActiveChange={setActiveTab}
-                    />
-
-                    {activeTab && (
-                        <ClipboardContent
-                            type={activeTab}
-                            content={item[activeTab]}
+            {tabs && clipoardList.map((item) => (
+                <div className='clipboard-item-wrap'>
+                    <div key={item.key} className='clipboard-item'>
+                        <ContentTypeTabs
+                            data={item}
+                            defaultActiveTab={item.format_types[0]}
+                            onActiveChange={changeActiveTab}
                         />
-                    )}
+
+                        {
+                            tabs[item.key] && (
+                                <ClipboardContent
+                                    type={tabs[item.key].active}
+                                    content={item[tabs[item.key].active]}
+                                />
+                            )
+                        }
+                    </div>
+                    <div className={'indicator ' + (indicatorIndex)}></div>
                 </div>
             ))}
         </div>

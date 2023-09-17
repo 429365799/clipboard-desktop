@@ -1,14 +1,14 @@
 import "./style.less";
 
 import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
-import { ClipboardData, FileInfo } from "../../interfaces"
+import { ClipboardData, FileInfo, FormatType } from "../../interfaces"
 import { useMemo, useState } from "react";
 import { Colors } from "../../constants";
 
 import fileIcon from '../../assets/react.svg'
 
 interface IProps {
-    type: keyof ClipboardData
+    type: FormatType
     content: any
 }
 

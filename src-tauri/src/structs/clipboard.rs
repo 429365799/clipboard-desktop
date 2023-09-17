@@ -1,11 +1,12 @@
-use std::fs;
+use std::{fs, time::SystemTime};
 
 use clipboardrs::api::{ClipboardData, ClipboardFile};
 use serde::{ser::SerializeStruct, Serialize};
 use tauri::api::path::cache_dir;
-use uuid::Uuid;
+use uuid::{Uuid, Timestamp};
+use md5;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct MyFile(ClipboardFile);
 
 impl Serialize for MyFile {
@@ -20,14 +21,16 @@ impl Serialize for MyFile {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct MyClipboardData {
     key: String,
-    len: usize,
     text: Option<String>,
     html: Option<String>,
     image: Option<String>,
     files: Option<Vec<MyFile>>,
+    hash: String,
+    len: usize,
+    time: u128,
 }
 
 impl MyClipboardData {
@@ -35,11 +38,16 @@ impl MyClipboardData {
         let mut len: usize = 0;
         let mut data = MyClipboardData {
             key: Uuid::new_v4().to_string(),
+            hash: String::from(""),
             len: 0,
             text: None,
             html: None,
             image: None,
             files: None,
+            time: SystemTime::now()
+                .duration_since(SystemTime::UNIX_EPOCH)
+                .unwrap()
+                .as_millis(),
         };
 
         if let Some(val) = raw_data.text {
@@ -74,6 +82,10 @@ impl MyClipboardData {
 
         data.len = len;
 
+        if let Ok(hash) = serde_json::to_string(&data) {
+            data.hash = format!("{:x}", md5::compute(hash));
+        }
+
         data
     }
 }
@@ -84,18 +96,27 @@ impl Serialize for MyClipboardData {
         S: serde::Serializer,
     {
         let mut s = serializer.serialize_struct("MyClipboardData", self.len)?;
-        if let Some(text) = &self.text {
-            s.serialize_field("text", text)?;
-        }
+        let mut format_types = vec![];
+
         if let Some(html) = &self.html {
             s.serialize_field("html", html)?;
+            format_types.push("html");
+        }
+        if let Some(text) = &self.text {
+            s.serialize_field("text", text)?;
+            format_types.push("text");
         }
         if let Some(img) = &self.image {
             s.serialize_field("image", img)?;
+            format_types.push("image");
         }
         if let Some(files) = &self.files {
             s.serialize_field("files", files)?;
+            format_types.push("files");
         }
+        s.serialize_field("key", &self.key)?;
+        s.serialize_field("time", &self.time)?;
+        s.serialize_field("format_types", &format_types)?;
         s.end()
     }
 }

@@ -1,10 +1,11 @@
 import { Colors } from "../../constants"
+import { FormatType } from "../../interfaces"
 
 interface IProps {
-    label: string
+    label: FormatType
     active: boolean
-    value?: string
-    onClick?: (value: string) => void
+    value?: FormatType
+    onClick?: (value: FormatType) => void
 }
 
 export const TabItem = (props: IProps) => {
