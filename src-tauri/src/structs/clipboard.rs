@@ -1,10 +1,10 @@
-use std::{fs, time::SystemTime};
+use std::{cmp::Ordering, fs, time::SystemTime};
 
 use clipboardrs::api::{ClipboardData, ClipboardFile};
+use md5;
 use serde::{ser::SerializeStruct, Serialize};
 use tauri::api::path::cache_dir;
-use uuid::{Uuid, Timestamp};
-use md5;
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub(crate) struct MyFile(ClipboardFile);
@@ -36,6 +36,7 @@ pub(crate) struct MyClipboardData {
 impl MyClipboardData {
     pub(crate) fn new(raw_data: ClipboardData) -> MyClipboardData {
         let mut len: usize = 0;
+        let mut hash_str = String::new();
         let mut data = MyClipboardData {
             key: Uuid::new_v4().to_string(),
             hash: String::from(""),
@@ -52,10 +53,12 @@ impl MyClipboardData {
 
         if let Some(val) = raw_data.text {
             len += 1;
+            hash_str.push_str(val.clone().as_str());
             data.text = Some(val);
         }
         if let Some(val) = raw_data.html {
             len += 1;
+            hash_str.push_str(val.clone().as_str());
             data.html = Some(val);
         }
         if let Some(val) = raw_data.image {
@@ -66,6 +69,7 @@ impl MyClipboardData {
                     if let Some(path) = path.to_str() {
                         if let Ok(()) = val.save(path) {
                             len += 1;
+                            hash_str.push_str(path.clone());
                             data.image = Some(path.to_string());
                         }
                     }
@@ -77,16 +81,34 @@ impl MyClipboardData {
             for f in val {
                 files.push(MyFile(f));
             }
+            hash_str.push_str(
+                &files
+                    .iter()
+                    .map(|item| serde_json::to_string(item).unwrap())
+                    .collect::<Vec<String>>()
+                    .join(""),
+            );
             data.files = Some(files);
         }
 
         data.len = len;
-
-        if let Ok(hash) = serde_json::to_string(&data) {
-            data.hash = format!("{:x}", md5::compute(hash));
-        }
+        data.hash = format!("{:x}", md5::compute(hash_str));
 
         data
+    }
+
+    pub fn eq(&self, target: &MyClipboardData) -> bool {
+        self.hash == target.hash
+    }
+
+    pub fn comp(&self, target: &MyClipboardData) -> Ordering {
+        if self.time > target.time {
+            Ordering::Greater
+        } else if self.time < target.time {
+            Ordering::Less
+        } else {
+            Ordering::Equal
+        }
     }
 }
 

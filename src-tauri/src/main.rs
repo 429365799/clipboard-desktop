@@ -11,8 +11,6 @@ use tauri::{
 use clipboardrs::api::read_clipboard_data;
 use clipboardrs::listener::ClipboardListen;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-
 mod commands {
     pub(crate) mod get_clipboard_list;
     pub(crate) mod show_in_folder;

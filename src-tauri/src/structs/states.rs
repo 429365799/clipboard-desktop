@@ -24,7 +24,15 @@ impl AppState {
 
     pub fn put_clipboard_data(&self, data: MyClipboardData) {
         if let Ok(mut clipboard_list) = self.clipboard_list.lock() {
-            (*clipboard_list).push(data);
+            match (*clipboard_list).last() {
+                Some(first) => {
+                    if !first.eq(&data) {
+                        (*clipboard_list).push(data);
+                    }
+                }
+                None => (*clipboard_list).push(data),
+            }
+            (*clipboard_list).sort_by(|a, b| a.comp(b))
         }
     }
 }
