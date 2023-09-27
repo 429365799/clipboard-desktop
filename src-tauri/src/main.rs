@@ -13,6 +13,7 @@ use clipboardrs::listener::ClipboardListen;
 
 mod commands {
     pub(crate) mod get_clipboard_list;
+    pub(crate) mod select_clipboard_data;
     pub(crate) mod show_in_folder;
     pub(crate) mod window_visible;
 }
@@ -27,8 +28,15 @@ fn init_app(app: &App) {
     ClipboardListen::run(move || {
         if let Ok(data) = read_clipboard_data() {
             let app_state = app_handle.state::<AppState>();
-            app_state.put_clipboard_data(MyClipboardData::new(data));
-            app_handle.emit_all("CLIPBOARD_UPDATE", ()).unwrap();
+
+            if let Ok(is_commiting_select) = app_state.is_commiting_select() {
+                if !is_commiting_select {
+                    app_state.put_clipboard_data(MyClipboardData::new(data));
+                    app_handle.emit_all("CLIPBOARD_UPDATE", ()).unwrap();
+                } else {
+                    app_state.set_commiting_select(false);
+                }
+            }
         }
     });
 }
@@ -134,6 +142,7 @@ fn main() {
             crate::commands::window_visible::toggle_main_window,
             crate::commands::window_visible::show_main_window,
             crate::commands::window_visible::hide_main_window,
+            crate::commands::select_clipboard_data::select_clipboard_data,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

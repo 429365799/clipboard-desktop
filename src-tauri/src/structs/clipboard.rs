@@ -110,6 +110,34 @@ impl MyClipboardData {
             Ordering::Equal
         }
     }
+
+    pub fn get_key(&self) -> &String {
+        &self.key
+    }
+
+    pub fn to_clipboard_data(&self) -> ClipboardData {
+        let mut data = ClipboardData {
+            text: None,
+            html: None,
+            image: None,
+            files: None,
+        };
+        if let Some(val) = &self.text {
+            data.text = Some(val.clone());
+        }
+        if let Some(val) = &self.html {
+            data.html = Some(val.clone());
+        }
+        if let Some(val) = &self.image {
+            if let Ok(img) = fs::read(val) {
+                data.image = Some(image::load_from_memory(&img).unwrap());
+            }
+        }
+        if let Some(val) = &self.files {
+            data.files = Some(val.iter().map(|item| item.0.clone()).collect());
+        }
+        data
+    }
 }
 
 impl Serialize for MyClipboardData {
